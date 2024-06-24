@@ -1,3 +1,114 @@
+# Customized Conventional Changelog action
+
+## Beyond Compare: Patch, Unified Diff
+
+```
+Left base folder: D:\Greyborn\Projects\TriPSs-conventional-changelog-action
+Right base folder: D:\Greyborn\Projects\conventional-changelog-action
+```
+
+### dist\commit1.hbs
+
+1. Replace the `*` with a `-` for bullet list items.
+
+```
+--- dist\commit1.hbs	2024-06-24 14:34:47.000000000 +0300
++++ dist\commit1.hbs	2024-06-24 14:56:08.000000000 +0300
+@@ -1,7 +1,7 @@
+-*{{#if scope}} **{{scope}}:**
++-{{#if scope}} **{{scope}}:**
+ {{~/if}} {{#if subject}}
+   {{~subject}}
+ {{~else}}
+   {{~header}}
+ {{~/if}}
+```
+
+### dist\header1.hbs
+
+1. Remove the parentheses surrounding `{{date}}` and insert an emdash `—` to separate the `{{title}}` and `{{date}}`. The file encoding must be `UTF-8` and not `ASCII`.
+
+```
+--- dist\header1.hbs	2024-06-24 14:34:47.000000000 +0300
++++ dist\header1.hbs	2024-06-15 04:01:19.000000000 +0300
+@@ -2,8 +2,8 @@
+   [{{version}}]({{compareUrlFormat}})
+ {{~else}}
+   {{~version}}
+ {{~/if}}
+ {{~#if title}} "{{title}}"
+ {{~/if}}
+-{{~#if date}} ({{date}})
++{{~#if date}} — {{date}}
+ {{/if}}
+```
+
+
+### dist\index.js
+
+1. Add the `writeStream.write()` call to insert lines at the beginning of the generated CHANGELOG.md file.
+
+```
+--- dist\index.js	2024-06-24 14:34:47.000000000 +0300
++++ dist\index.js	2024-06-24 15:34:28.000000000 +0300
+@@ -23896,12 +23896,20 @@
+       // All stream pipes have completed
+       writeStream.end()
+       resolve()
+     }
+   }
+ 
++  writeStream.write("# Changelog\n"
++                  + "\n"
++                  + "All notable changes to this project will be documented in this file.\n"
++                  + "\n"
++                  + "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and"
++                  + " this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n"
++                  + "\n")
++
+   pipeNextStream()
+ 
+ })
+ 
+ 
+ /***/ }),
+```
+
+### dist\template1.hbs
+
+1. Add two blank lines above `{{> header}}` to separate commits.  
+   ⚠️ Adding a third blank line above the header will cause all commits to generate a release, even those that shouldn't.
+
+2. Remove the blank line below `{{> header}}`.
+
+3. Replace the `*` with a `-` for bullet list items.
+
+```
+--- dist\template1.hbs	2024-06-24 14:34:47.000000000 +0300
++++ dist\template1.hbs	2024-06-24 16:22:23.000000000 +0300
+@@ -1,15 +1,16 @@
++
++
+ {{> header}}
+-
+ {{#if noteGroups}}
+ {{#each noteGroups}}
+ 
+ ### ⚠ {{title}}
+ 
+ {{#each notes}}
+-* {{#if commit.scope}}**{{commit.scope}}:** {{/if}}{{text}}
++- {{#if commit.scope}}**{{commit.scope}}:** {{/if}}{{text}}
+ {{/each}}
+ {{/each}}
+ {{/if}}
+ {{#each commitGroups}}
+ 
+ {{#if title}}
+```
+
+-----
+
 # Conventional Changelog action
 
 This action will bump version, tag commit and generate a changelog with conventional commits.
